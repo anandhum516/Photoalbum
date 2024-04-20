@@ -1,147 +1,320 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wordle Game</title>
+    <title>Image Processing Operations</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-image: url('word.avif'); /* Background image */
+         body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('yjdXBi.gif'); /* Background image */
             background-size: cover;
             background-repeat: no-repeat;
-            color: #333;
-        }
-
-        .container {
-            text-align: center;
-            background-color: rgba(255, 255, 255, 0.9); /* Background color with transparency */
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
-            width: 80%;
-            max-width: 400px;
+            color: #e9ecf5;
         }
 
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 30px;
-            color: #007BFF;
-        }
-
-        input[type="text"] {
-            padding: 12px;
+            text-align: center;
             margin-top: 20px;
-            font-size: 1.2rem;
-            border-radius: 8px;
-            border: 2px solid #007BFF;
-            width: 100%;
-            box-sizing: border-box;
         }
-
-        button {
-            padding: 12px 24px;
+        #imageContainer {
             margin-top: 20px;
-            font-size: 1.2rem;
-            background-color: #007BFF;
-            color: white;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin: 10px;
+
+        }
+        .btn-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .btn-container button {
+            margin: 5px;
+            padding: 10px 20px;
+            background-color: #4c00ff;
+            color: #fff;
             border: none;
-            border-radius: 8px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease-in-out;
         }
 
-        button:hover {
-            background-color: #0056b3;
+        .upload-btn {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
         }
-
-        #result {
-            margin-top: 30px;
-            font-size: 1.3rem;
-            font-weight: bold;
-        }
-
-        #word {
-            font-size: 2rem;
-            margin-top: 30px;
+        .upload-btn:hover {
+            background-color: #218838;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/camanjs/4.1.2/caman.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/qrcode.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Wordle Game</h1>
-        <div id="word"></div>
-        <input type="text" id="guess" maxlength="5" placeholder="Enter your guess">
-        <button onclick="checkGuess()">Check</button>
-        <div id="result"></div>
+    <h1>Image Processing Operations</h1>
+    <div>
+        <input type="file" accept="image/*" multiple onchange="uploadImages(event)">
+    </div>
+    <div id="imageContainer"></div>
+    <div class="btn-container">
+        <button onclick="checkImageColor()">Check Color</button>
+        <button onclick="makeImageReddish()">Make Reddish</button>
+        <button onclick="makeImageBlueish()">Make Blueish</button>
+        <button onclick="makeImageGreenish()">Make Greenish</button>
+        <button onclick="duplicateImage()">Duplicate Image</button>
+        <button onclick="increaseBrightness()">Increase Brightness</button>
+        <button onclick="reduceResolution()">Reduce Resolution</button>
+        <button onclick="createAvatar()">Create Avatar</button>
+        <button onclick="convertToGrayscale()">Convert to Grayscale</button>
+        <button onclick="generateQRCode()">Generate QR Code</button>
+        <button onclick="filterImages()">Filter Images</button>
+        <select onchange="selectThumbnailSize()">
+            <option value="100">Thumbnail (100x100)</option>
+            <option value="200">Thumbnail (200x200)</option>
+            <option value="300">Thumbnail (300x300)</option>
+        </select>
     </div>
 
     <script>
-        const wordList = ['apple', 'banana', 'cherry', 'date', 'elderberry', 'fig', 'grape', 'honeydew', 'kiwi', 'lemon'];
+        function uploadImages(event) {
+            var files = event.target.files;
+            var imageContainer = document.getElementById('imageContainer');
+            imageContainer.innerHTML = '';
 
-        let secretWord = getRandomWord(wordList);
-        let remainingAttempts = 6;
-        let guessedLetters = [];
-
-        document.getElementById('word').textContent = '_'.repeat(secretWord.length);
-
-        function getRandomWord(wordList) {
-            const randomIndex = Math.floor(Math.random() * wordList.length);
-            return wordList[randomIndex];
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                var img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.onload = function() {
+                    URL.revokeObjectURL(this.src);
+                }
+                imageContainer.appendChild(img);
+            }
         }
 
-        function checkGuess() {
-            const guess = document.getElementById('guess').value.toLowerCase();
+        function checkImageColor() {
+            var images = document.querySelectorAll('#imageContainer img');
+            images.forEach(function(img) {
+                var canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, img.width, img.height);
 
-            if (guess.length !== 5 || !/^[a-z]+$/.test(guess)) {
-                alert('Please enter a 5-letter word using only alphabets.');
-                return;
-            }
+                var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                var pixels = imageData.data;
+                var redCount = 0;
+                var greenCount = 0;
+                var blueCount = 0;
 
-            if (guessedLetters.includes(guess)) {
-                alert('You already guessed that word.');
-                return;
-            }
-
-            guessedLetters.push(guess);
-
-            let result = '';
-            let newWord = '';
-
-            for (let i = 0; i < secretWord.length; i++) {
-                if (secretWord[i] === guess[i]) {
-                    result += '🟩';
-                    newWord += guess[i];
-                } else if (secretWord.includes(guess[i])) {
-                    result += '🟨';
-                    newWord += '_';
-                } else {
-                    result += '🟥';
-                    newWord += '_';
+                for (var i = 0; i < pixels.length; i += 4) {
+                    var red = pixels[i];
+                    var green = pixels[i + 1];
+                    var blue = pixels[i + 2];
+                    if (red > green + blue) {
+                        redCount++;
+                    } else if (green > red + blue) {
+                        greenCount++;
+                    } else if (blue > red + green) {
+                        blueCount++;
+                    }
                 }
-            }
 
-            document.getElementById('word').textContent = newWord;
-            document.getElementById('result').textContent = result;
+                var totalPixels = pixels.length / 4;
+                var redPercentage = (redCount / totalPixels) * 100;
+                var greenPercentage = (greenCount / totalPixels) * 100;
+                var bluePercentage = (blueCount / totalPixels) * 100;
 
-            if (newWord === secretWord) {
-                document.getElementById('result').textContent = 'Congratulations! You guessed the word!';
-                document.getElementById('guess').disabled = true;
-            } else {
-                remainingAttempts--;
-
-                if (remainingAttempts === 0) {
-                    document.getElementById('result').textContent = `You ran out of attempts. The word was ${secretWord}.`;
-                    document.getElementById('guess').disabled = true;
+                var dominantColor;
+                if (redPercentage > 50) {
+                    dominantColor = 'Reddish';
+                } else if (greenPercentage > 50) {
+                    dominantColor = 'Greenish';
+                } else if (bluePercentage > 50) {
+                    dominantColor = 'Blueish';
                 } else {
-                    document.getElementById('result').textContent += ` Remaining attempts: ${remainingAttempts}`;
+                    dominantColor = 'None';
                 }
-            }
-            document.getElementById('guess').value = '';
+
+                alert('Dominant Color of Image: ' + dominantColor);
+            });
+        }
+
+        function makeImageReddish() {
+            var images = document.querySelectorAll('#imageContainer img');
+            images.forEach(function(img) {
+                var canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+
+                var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                var data = imageData.data;
+
+                for (var i = 0; i < data.length; i += 4) {
+                    data[i] += 50;
+                    data[i + 1] -= 25;
+                    data[i + 2] -= 25;
+                }
+
+                ctx.putImageData(imageData, 0, 0);
+                img.src = canvas.toDataURL();
+            });
+        }
+
+        function makeImageBlueish() {
+            var images = document.querySelectorAll('#imageContainer img');
+            images.forEach(function(img) {
+                var canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+
+                var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                var data = imageData.data;
+
+                for (var i = 0; i < data.length; i += 4) {
+                    data[i] -= 25;
+                    data[i + 1] -= 25;
+                    data[i + 2] += 50;
+                }
+
+                ctx.putImageData(imageData, 0, 0);
+                img.src = canvas.toDataURL();
+            });
+        }
+
+        function makeImageGreenish() {
+            var images = document.querySelectorAll('#imageContainer img');
+            images.forEach(function(img) {
+                var canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+
+                var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                var data = imageData.data;
+
+                for (var i = 0; i < data.length; i += 4) {
+                    data[i] -= 25;
+                    data[i + 1] += 50;
+                    data[i + 2] -= 25;
+                }
+
+                ctx.putImageData(imageData, 0, 0);
+                img.src = canvas.toDataURL();
+            });
+        }
+
+        function duplicateImage() {
+            var images = document.querySelectorAll('#imageContainer img');
+            images.forEach(function(img) {
+                var newImg = img.cloneNode(true);
+                document.getElementById('imageContainer').appendChild(newImg);
+            });
+        }
+
+        function increaseBrightness() {
+            var images = document.querySelectorAll('#imageContainer img');
+            images.forEach(function(img) {
+                Caman(img, function () {
+                    this.brightness(20).render();
+                });
+            });
+        }
+
+        function reduceResolution() {
+            var images = document.querySelectorAll('#imageContainer img');
+            images.forEach(function(img) {
+                Caman(img, function () {
+                    this.resize({ width: img.width / 2, height: img.height / 2 }).render();
+                });
+            });
+        }
+
+        function createAvatar() {
+            var images = document.querySelectorAll('#imageContainer img');
+            images.forEach(function(img) {
+                var canvas = document.createElement('canvas');
+                canvas.width = 100;
+                canvas.height = 100;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                img.src = canvas.toDataURL();
+            });
+        }
+
+        function convertToGrayscale() {
+            var images = document.querySelectorAll('#imageContainer img');
+            images.forEach(function(img) {
+                var canvas = document.createElement('canvas');
+                var ctx = canvas.getContext('2d');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+
+                var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                var data = imageData.data;
+
+                for (var i = 0; i < data.length; i += 4) {
+                    var avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                    data[i] = avg;
+                    data[i + 1] = avg;
+                    data[i + 2] = avg;
+                }
+
+                ctx.putImageData(imageData, 0, 0);
+                img.src = canvas.toDataURL();
+            });
+        }
+
+        function generateQRCode() {
+            var url = window.location.href;
+            var qrCode = new QRCode(document.getElementById("qrcode"), {
+                width: 200,
+                height: 200
+            });
+            qrCode.makeCode(url); 
+        }
+
+        function filterImages() {
+            var altText = prompt("Enter alt text to filter images:");
+            var images = document.querySelectorAll('#imageContainer img');
+            images.forEach(function(img) {
+                if (img.alt.toLowerCase().includes(altText.toLowerCase())) {
+                    img.style.display = 'inline-block';
+                } else {
+                    img.style.display = 'none';
+                }
+            });
+        }
+
+        function selectThumbnailSize() {
+            var size = document.querySelector('select').value;
+            var images = document.querySelectorAll('#imageContainer img');
+            images.forEach(function(img) {
+                var canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                img.src = canvas.toDataURL();
+            });
         }
     </script>
 </body>
